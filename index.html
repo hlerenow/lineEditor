@@ -245,17 +245,20 @@
             return false;
           }
           
-
+          //屏蔽左右方向键在IE8
           if(e.keyCode==37||e.keyCode==39){
               console.log("wode ");
 
                 var ieSelection=document.selection;
 
                 //抛弃ie8的 左右方向键
-                if(!(ieSelection&&window.getSelection)){
-                  console.log("抛弃ie8的左右方向键");
-                  e.preventDefault();
-                  return false;
+                if(ieSelection){
+                  if(!window.getSelection){
+                    console.log("抛弃ie8的左右方向键");
+                    e.preventDefault();
+                    return false;
+                    
+                  }
                 }
 
               setTimeout(function(){
