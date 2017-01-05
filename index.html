@@ -44,13 +44,10 @@
         color: #c0bdbd;    
       }
       .lineContext{
-        /*display: block;*/
-        overflow-wrap: normal;        
+
+        overflow-wrap: break-word;        
         border-bottom: 1px solid #d5d5d5;
         vertical-align: middle;
-        /*width: 100%;*/
-        /*box-sizing:border-box;*/
-        /*overflow-x: hidden;*/
       }
     </style>
   </head>
@@ -65,234 +62,275 @@
     </div>
     <script type="text/javascript">    
 
-
-    // console.log("我是分支");
+    console.log("我是分支");
     // var cd=window.navigator;
     // for(var i in cd){
-    //   console.log(i+" "+cd[i]);
+    // console.log(i+" "+cd[i]);
     // }
-      //是否选中当前编辑器
-      
-      var editorState=0;
+    //是否选中当前编辑器
 
-      //最大行数
-      var maxLine=40;
+    var editorState = 0;
 
-      //当前所在行数
-      var nowLineNumber=0;
+    //最大行数
+    var maxLine = 40;
+
+    //当前所在行数
+    var nowLineNumber = 0;
 
 
-      $(document.body).on("click",function(e){
-          editorState=0;
-          // alert(editorState);
-      });
+    $(document.body).on("click", function(e) {
+        editorState = 0;
+        // alert(editorState);
+    });
 
-      $("#easyCon").on("click",function(e){
+    $("#easyCon").on("click", function(e) {
         // 阻止冒泡
-        if(e.stopPropagation){
-          e.stopPropagation();
-        }else{
-          e.cancelBubble=true;
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        } else {
+            e.cancelBubble = true;
         }
-        editorState=1;
-      });
+        editorState = 1;
+    });
 
-      $("#easyCon").on("click",".lineContext",function(e){
-        nowLineNumber=$("#easyCon .lineContext").index($(this));
-        console.log("当前所在行数"+nowLineNumber);
+    $("#easyCon").on("click", ".lineContext", function(e) {
+        nowLineNumber = $("#easyCon .lineContext").index($(this));
+        // console.log("当前所在行数"+nowLineNumber);
 
-      });
+    });
 
-      $(document).keydown(function(e){
+    $(document).keydown(function(e) {
 
-        var doPrevent=0;
-
-        console.log(e.keyCode);
-          if(editorState!==1){
-            return;
-          }
-
-          // 回车键
-          if(e.keyCode==13){
-            // 文本行
-            var lines=$("#contextEassy .lineContext");
-
-            // 行数行
-            var lineNumers=$("#lineNumberCon .lineNumber");
-
-            if(lines.length<maxLine){
-
-              $("#lineNumberCon").append("<div class=\"lineNumber\" >"+(lineNumers.length+1)+"</div>");
-              
-              nowLineNumber++;
-
-              setTimeout(function(){
-                var cnode=document.getElementById("contextEassy").childNodes;
-
-                for(var i=0;i<cnode.length;i++){
-                  if(cnode[i].nodeType==3 && cnode[i].textContent && $.trim(cnode[i].textContent)){
-                    $(cnode[i]).wrap("<p class=\"lineContext\"/>");
-                  }else{
-                    if(cnode[i].className!="lineContext"){
-                      $(cnode[i]).addClass("lineContext");
-                    }
-                  }
+        setTimeout(function(){
+            end();                          
+            //对齐行高
+            console.log("对齐行高");
+            lines = $("#contextEassy .lineContext");
+            lineNumers = $("#lineNumberCon .lineNumber");        
+ 
+            for(var i=0;i<lines.length;i++){
+                console.log()
+                if($(lineNumers[i]).height()!=$(lines[i]).height()){
+                    $(lineNumers[i]).css("height",$(lines[i]).height());                    
                 }
-              });
+            }
+            //为了解决fox,ie9偶尔顶部会有空节点
+            var cnode = document.getElementById("contextEassy").childNodes;
+            if (cnode[0].nodeType == 3) {
+                $(cnode[0]).remove();
+            }            
+        },200);      
+        var doPrevent = 0;
 
-              console.log("当前所在行数"+nowLineNumber);
+        // 对齐行数
+        
+        function end(){
+            console.log("对齐一次哈");
+            var lines = $("#contextEassy .lineContext");
+            var lineNumers = $("#lineNumberCon .lineNumber");        
+
+
+            //对齐行号
+            if(lines.length!=lineNumers.length){
+                console.log("需要对齐")
+                if(lines.length>lineNumers.length){
+                    for(var i=lineNumers.length;i<lines.length;i++){
+                        $("#lineNumberCon").append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
+                    }
+                }
+
+                if(lines.length<lineNumers.length){
+                    for(var i=lineNumers.length;i>lines.length;i--){
+                        $(lineNumers[i-1]).remove();
+                    }
+                }
 
             }else{
-            //达到最大行数              
-              e.preventDefault();
-              return false;
+                console.log("不用对齐");
+                console.log("\n");
             }
-          }
+        }
 
-          // 删除键
-          if (e.keyCode == 8) {
+        // console.log(e.keyCode);
+        if (editorState !== 1) {
+            return;
+        }
+
+        var nowLineNumber=getNowLine();
+
+        // 回车键
+        if (e.keyCode == 13) {
+            // 文本行
+            var lines = $("#contextEassy .lineContext");
+
+            // 行数行
+            var lineNumers = $("#lineNumberCon .lineNumber");
+
+            if (lines.length < maxLine) {
+
+                $("#lineNumberCon").append("<div class=\"lineNumber\" >" + (lineNumers.length + 1) + "</div>");
+
+                nowLineNumber++;
+
+                setTimeout(function() {
+                    var cnode = document.getElementById("contextEassy").childNodes;
+
+                    for (var i = 0; i < cnode.length; i++) {
+                        if (cnode[i].nodeType == 3 && cnode[i].textContent && $.trim(cnode[i].textContent)) {
+                            $(cnode[i]).wrap("<p class=\"lineContext\"/>");
+                        } else {
+                            if (cnode[i].className != "lineContext") {
+                                $(cnode[i]).addClass("lineContext");
+                            }
+                        }
+                    }
+
+                    //对齐行数
+                    end();
+                });
+
+                // console.log("当前所在行数"+nowLineNumber);
+
+            } else {
+                //达到最大行数              
+                e.preventDefault();
+                return false;
+            }
+        }
+
+        // 删除键
+        if (e.keyCode == 8) {
 
             var lines = $("#contextEassy .lineContext");
             var lineNumers = $("#lineNumberCon .lineNumber");
+            var nowLineText = lines[nowLineNumber].textContent || lines[nowLineNumber].innerText;
+            var pointerPos = window.getSelection().anchorOffset;
 
+            //如果是第一行并且内容为空，拒绝删除
+            if (nowLineNumber === 0 && (pointerPos === 0 || (pointerPos === 1 && $.trim(nowLineText) == ""))) {
+                console.log("如果是第一行并且内容为空，拒绝删除");
+                e.preventDefault();
+                return false;
 
-            if (lines.length === 1) {
-              var topLineText=lines[0].textContent||lines[0].innerText;
-              if($.trim(topLineText)==""){
-                console.log("只剩一行啦");
-                doPrevent=1;                
-              }
+            }
 
-            } else {
-              console.log("当前行数"+nowLineNumber);
-              var nowLineDom = lines[nowLineNumber];
-              var nextLineDom = lines[nowLineNumber+1];
-
-              var nowLineText=nowLineDom.textContent||nowLineDom.innerText;
-
-              //判断当前行是否是空
-              // console.log(nowText);
-              if ($.trim(nowLineText) == "") {
-
-                // 删除行数左边
-                console.log(lineNumers[lineNumers.length - 1].innerHTML);
+            //如果光标在一行的首部
+            if (pointerPos === 0 || (pointerPos === 1 && $.trim(nowLineText) == "")) {
+                console.log("//如果光标在一行的首部");
                 $(lineNumers[lineNumers.length - 1]).remove();
-
-                //删除右边文本
-                // $(lines[nowLineNumber]).remove();
-
-                console.log("删除行数"+nowLineNumber);
-
-                //如果当前行是第一行 则不改变 当前行的计数
-                //
-                if (nowLineNumber == 0) {
-                  nowLineDom.innerHTML=nextLineDom.innerHTML;
-                  $(nextLineDom).remove();
-                  doPrevent=1;
-                } else {
-                  nowLineNumber--;
-                }
-
-              }
-            }
-            setTimeout(function(){
-              var cnode=document.getElementById("contextEassy").childNodes;
-                  if(cnode[0].nodeType==3){
-                    $(cnode[0]).remove();
-                  }
-            });  
-                      
-            if(doPrevent===1){
-              //阻止默认的删除行为
-              e.preventDefault;
-
-              return false;
-            }
-          }
-
-          // 上键
-          if(e.keyCode===40){
-            nowLineNumber++;
-            var lines=$("#contextEassy .lineContext");            
-            if(nowLineNumber>(lines.length-1)){
-              nowLineNumber=lines.length-1;
-            }
-            console.log("当前所在行数"+nowLineNumber);
-
-          }
-
-          //下键
-          if(e.keyCode===38){
-            nowLineNumber--;
-            if(nowLineNumber<0){
-              nowLineNumber=0;
+                nowLineNumber--;
+                return;
             }
 
-            console.log("当前所在行数"+nowLineNumber);
+            setTimeout(function() {
+                //对齐行数
+                end();
+            });
+        }
 
-          }
-          //屏蔽pageup 和pageDn
-          if(e.keyCode==33||e.keydown==34){
-            e.preventDefault;
-            return false;
-          }
+        // // 上键
+        // if (e.keyCode === 40) {
+        //     nowLineNumber++;
+        //     var lines = $("#contextEassy .lineContext");
+        //     if (nowLineNumber > (lines.length - 1)) {
+        //         nowLineNumber = lines.length - 1;
+        //     }
+        //     // console.log("当前所在行数"+nowLineNumber);
 
-          //屏蔽剪辑 和粘贴
-          
-          if((e.keyCode==67||e.keyCode==86)&&e.ctrlKey){
-            console.log("不执行");
-            e.preventDefault();
-            return false;
-          }
-          
-          //屏蔽左右方向键在IE8
-          if(e.keyCode==37||e.keyCode==39){
-              console.log("wode ");
+        // }
 
-                var ieSelection=document.selection;
+        // //下键
+        // if (e.keyCode === 38) {
+        //     nowLineNumber--;
+        //     if (nowLineNumber < 0) {
+        //         nowLineNumber = 0;
+        //     }
 
-                //抛弃ie8的 左右方向键
-                if(ieSelection){
-                  if(!window.getSelection){
-                    console.log("抛弃ie8的左右方向键");
-                    e.preventDefault();
-                    return false;
-                    
-                  }
-                }
+        //     // console.log("当前所在行数"+nowLineNumber);
 
-              setTimeout(function(){
+        // }
 
-                console.log("我的");
-                var selectionNode=window.getSelection().anchorNode;
+        //屏蔽pageup 和pageDn
+        // if (e.keyCode == 33 || e.keydown == 34) {
+        //     e.preventDefault;
+        //     return false;
+        // }
 
-                while(selectionNode.nodeType===3){
-                  selectionNode=$(selectionNode).parent()[0];
-                }
+        // //屏蔽剪辑 和粘贴
 
-                console.log("当前选中的 元素",selectionNode);
+        // if ((e.keyCode == 67 || e.keyCode == 86) && e.ctrlKey) {
+        //     // console.log("不执行");
+        //     e.preventDefault();
+        //     return false;
+        // }
 
-                var temp=$("#contextEassy .lineContext").index(selectionNode);
+        // //屏蔽左右方向键在IE8
+        // if (e.keyCode == 37 || e.keyCode == 39) {
+        //     // console.log("wode ");
 
-                console.log(temp);
-                if(temp>=0){
-                  nowLineNumber=temp;
-                }
-                console.log(nowLineNumber);
+        //     var ieSelection = document.selection;
 
-              });
-              console.log("tade ");
-          }
+        //     // //抛弃ie8的 左右方向键
+        //     // if (ieSelection) {
+        //     //     if (!window.getSelection) {
+        //     //         // console.log("抛弃ie8的左右方向键");
+        //     //         e.preventDefault();
+        //     //         return false;
+
+        //     //     }
+        //     // }
+
+        //     setTimeout(function() {
+
+        //         // console.log("我的");
+        //         var selectionNode = window.getSelection().anchorNode;
+
+        //         while (selectionNode.nodeType === 3) {
+        //             selectionNode = $(selectionNode).parent()[0];
+        //         }
+
+        //         // console.log("当前选中的 元素",selectionNode);
+
+        //         var temp = $("#contextEassy .lineContext").index(selectionNode);
+
+        //         // console.log(temp);
+        //         if (temp >= 0) {
+        //             nowLineNumber = temp;
+        //         }
+        //         // console.log(nowLineNumber);
+
+        //     });
+        //     // console.log("tade ");
+        // }
 
 
-      }); 
+    });
 
+    function getNowLine(){
+        var selectionNode = window.getSelection().anchorNode;
+        var nowLineNumber=0;
 
-    </script>
+        while (selectionNode.nodeType === 3) {
+            selectionNode = $(selectionNode).parent()[0];
+        }
+
+        // console.log("当前选中的 元素",selectionNode);
+
+        var temp = $("#contextEassy .lineContext").index(selectionNode);
+
+        // console.log(temp);
+        if (temp >= 0) {
+            nowLineNumber = temp;
+        }
+
+        return nowLineNumber;
+    };
+
+</script>
   </body>
 </html>
 
 
 <!-- 
-
+sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
  -->
