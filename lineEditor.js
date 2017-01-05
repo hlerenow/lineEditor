@@ -45,10 +45,9 @@ lineEditor=(function($){
 
 
                 $(this.editorContainer).addClass("easyCon");
-                // console.log( x);
+
                 this.editorContainer.html(this.domHtml);
-                // this.editorContainer.html("123");
-                // 
+
                 this.bodyEvent();
                 this.bodyEvent=function(){};
 
@@ -58,6 +57,11 @@ lineEditor=(function($){
                 var self=this;
                 //激活编辑器事件
                 this.activeEditor();
+                //窗口大小改变
+                $(window).on("resize",function(){
+                        self.alignLine();
+                        self.alignHeight();
+                })
 
                 $(document).keydown(function(e) {
 
@@ -68,7 +72,8 @@ lineEditor=(function($){
                     //确保页面不会乱
                     setTimeout(function(){
                         self.alignLine();
-                        self.alignHeight();          
+                        self.alignHeight();
+                        self.getNowEditor();
                     }); 
                     
 
@@ -76,14 +81,13 @@ lineEditor=(function($){
 
                     // 回车键
                     if (e.keyCode == 13) {
-                        console.log(_nowEditor);
                         var lines = $("#contextEassy_"+_nowEditor+" .lineContext");
 
                         var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");
 
                         if (lines.length < self.maxLine) {
 
-                            $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (lineNumers.length + 1) + "</div>");
+                            // $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (lineNumers.length + 1) + "</div>");
 
                             nowLineNumber++;
 
@@ -118,7 +122,7 @@ lineEditor=(function($){
 
                         //如果是第一行并且内容为空，拒绝删除
                         if (nowLineNumber === 0 && (pointerPos === 0 || (pointerPos === 1 && $.trim(nowLineText) == ""))) {
-                            console.log("如果是第一行并且内容为空，拒绝删除");
+                            // console.log("如果是第一行并且内容为空，拒绝删除");
                             e.preventDefault();
                             return false;
 
@@ -126,7 +130,7 @@ lineEditor=(function($){
 
                         //如果光标在一行的首部
                         if (pointerPos === 0 || (pointerPos === 1 && $.trim(nowLineText) == "")) {
-                            console.log("//如果光标在一行的首部");
+                            // console.log("//如果光标在一行的首部");
                             $(lineNumers[lineNumers.length - 1]).remove();
                             nowLineNumber--;
                             return;
@@ -144,7 +148,7 @@ lineEditor=(function($){
                         e.cancelBubble = true;
                     }
                     _nowEditor = self.id;
-                    console.log("当前编辑器："+_nowEditor);               
+                    // console.log("当前编辑器："+_nowEditor);               
                 });            
             },
             closeEditor:function(){
@@ -153,22 +157,34 @@ lineEditor=(function($){
             bodyEvent:function(){
                 $(document.body).on("click", function(e) {
                     _nowEditor = -1;
-                    console.log("当前编辑器："+_nowEditor);                    
+                    // console.log("当前编辑器："+_nowEditor);                    
 
                     // alert(editorState);
                 });            
             },
             getNowLine: function() {
+
                 var selectionNode = window.getSelection().anchorNode;
                 var nowLineNumber = 0;
+                var temp=0;
 
-                while (!(selectionNode.nodeType === 1&&selectionNode.nodeName.toLowerCase()=="p")) {
-                    selectionNode = $(selectionNode).parent()[0];
+                if($("#contextEassy_"+_nowEditor+" .lineContext").length==0){
+                    $("#contextEassy_"+_nowEditor).append("<p class=\"lineContext\"><br></p>");
+                }else{
+                    try{                        
+                        while (!(selectionNode.nodeType === 1&&selectionNode.nodeName.toLowerCase()=="p")) {
+                            selectionNode = $(selectionNode).parent()[0];
+                        }    
+                        temp = $("#contextEassy_"+_nowEditor+" .lineContext").index(selectionNode);                                    
+                    } catch(e){
+
+                    }
                 }
+
 
                 // console.log("当前选中的 元素",selectionNode);
 
-                var temp = $("#contextEassy_"+_nowEditor+" .lineContext").index(selectionNode);
+
 
                 // console.log(temp);
                 if (temp >= 0) {
@@ -177,14 +193,22 @@ lineEditor=(function($){
 
                 return nowLineNumber;
             },
+            getNowEditor:function(){
+                var node=this.getNowLine();
+
+                var tid=$($("#contextEassy_"+_nowEditor+" .lineContext")[node]).parent()[0].id;
+                console.log(tid);
+                _nowEditor=parseInt(tid.split("_")[1]);
+
+            },
             alignHeight:function(){
                 //对齐行高
-                console.log("对齐行高");
+                // console.log("对齐行高");
                 lines = $("#contextEassy_"+_nowEditor+" .lineContext");
                 lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");        
      
                 for(var i=0;i<lines.length;i++){
-                    console.log()
+                    // console.log()
                     if($(lineNumers[i]).height()!=$(lines[i]).height()){
                         $(lineNumers[i]).css("height",$(lines[i]).height());                    
                     }
@@ -196,14 +220,14 @@ lineEditor=(function($){
                 }             
             },
             alignLine:function(){
-                console.log("对齐一次哈");
+                // console.log("对齐一次哈");
                 var lines = $("#contextEassy_"+_nowEditor+" .lineContext");
                 var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");        
 
 
                 //对齐行号
                 if(lines.length!=lineNumers.length){
-                    console.log("需要对齐")
+                    // console.log("需要对齐")
                     if(lines.length>lineNumers.length){
                         for(var i=lineNumers.length;i<lines.length;i++){
                             $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
@@ -217,12 +241,12 @@ lineEditor=(function($){
                     }
 
                 }else{
-                    console.log("不用对齐");
-                    console.log("\n");
+                    // console.log("不用对齐");
+                    // console.log("\n");
                 }            
             },
             getText:function(){
-                console.log(this.editorContainer.html());
+                // console.log(this.editorContainer.html());
             }
         }
 
