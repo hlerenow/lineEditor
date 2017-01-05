@@ -5,4 +5,4 @@
 1. 支持行号显示
 2. 支持编辑器内部内容的复制粘贴(粘贴外部的内容有惊喜);
 
-### [Demo](https://hlerenow.github.io/lineEditor/])
+### [Demo](https://hlerenow.github.io/lineEditor/)
