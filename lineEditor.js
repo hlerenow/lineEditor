@@ -87,7 +87,6 @@ lineEditor=(function($){
                 });
 
                 //按键事件
-                $(document).keydown(function(e) {
                 $(this.editorContainer).keydown(function(e) {
 
                     if(_nowEditor===-1){
