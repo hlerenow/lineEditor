@@ -25,7 +25,7 @@ lineEditor=(function($){
         };
 
         lineEditor.prototype={
-            maxLine:40,
+            maxLine:555,
             getDomTemplate:function(){
                 return ''+
                         '      <div id="lineNumberCon_'+this.id+'" class="lineNumberCon">'+
@@ -79,7 +79,7 @@ lineEditor=(function($){
                     return false;
                 });                
 
-                //浏览器粘贴事件
+                // 浏览器粘贴事件
                 $(this.editorContainer).on("paste",function(e){
                     // console.log("浏览器粘贴事件");
                     setTimeout(function(){
@@ -102,11 +102,10 @@ lineEditor=(function($){
                         return false;
                     }
                     //确保页面不会乱
-                    setTimeout(function(){
-                        self.alignLine(_nowEditor);
-                        self.alignHeight(_nowEditor);
-                        self.getNowEditor(_nowEditor);
-                    }); 
+                    var arryCoedCal=[33,34,35,36,37,38,39,40];
+                    if(arryCoedCal.indexOf(e.keyCode)===-1){
+                       self.reDrawAll();
+                    };
                     
 
                     var nowLineNumber=self.getNowLine();
@@ -117,19 +116,21 @@ lineEditor=(function($){
 
                         var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");
 
-                        if (lines.length < self.maxLine) {
+                        // if (lines.length < self.maxLine) {
 
                             // $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (lineNumers.length + 1) + "</div>");
 
                             nowLineNumber++;
 
-                            setTimeout(self.wrapLine);
+                            setTimeout(function(){
+                                self.wrapLine(_nowEditor,3);
+                            });
 
-                        } else {
-                            //达到最大行数              
-                            e.preventDefault();
-                            return false;
-                        }
+                        // } else {
+                        //     //达到最大行数              
+                        //     e.preventDefault();
+                        //     return false;
+                        // }
                     }
 
                     // 删除键
@@ -223,7 +224,7 @@ lineEditor=(function($){
                 _nowEditor=parseInt(tid.split("_")[1]);
 
             },
-            alignHeight:function(eid){
+            alignHeight:function(eid,offset){
                 // console.log(eid);
 
                 // if(_nowEditor==-1){
@@ -232,9 +233,16 @@ lineEditor=(function($){
                 //对齐行高
                 // console.log("对齐行高");
                 lines = $("#contextEassy_"+eid+" .lineContext");
-                lineNumers = $("#lineNumberCon_"+eid+" .lineNumber");        
+                lineNumers = $("#lineNumberCon_"+eid+" .lineNumber");    
+
+                var nowLineNumber=this.getNowLine();
+                var allLines=lines.length;  
+
+                if(offset){
+                   allLines=nowLineNumber+parseInt(offset);
+                }
      
-                for(var i=0;i<lines.length;i++){
+                for(var i=nowLineNumber;i<allLines;i++){
                     // console.log()
                     if($(lineNumers[i]).height()!=$(lines[i]).height()){
                         $(lineNumers[i]).css("height",$(lines[i]).height());                    
@@ -243,13 +251,13 @@ lineEditor=(function($){
                 //为了解决fox,ie9偶尔顶部会有空节点
                 var cnode = document.getElementById("contextEassy_"+eid).childNodes;
                 // console.log(document.getElementById("contextEassy_"+_nowEditor));
-                for(var i=0;i<cnode.length;i++){
-                    if (cnode[i].nodeType == 3&&$.trim(cnode[i].textContent)=="") {
+                for(var i=nowLineNumber;i<5;i++){
+                    if (cnode[i]&&cnode[i].nodeType == 3&&$.trim(cnode[i].textContent)=="") {
                         $(cnode[i]).remove();
                     }                    
                 }
             },
-            alignLine:function(eid){
+            alignLine:function(eid,offset){
                 // console.log("对齐一次哈");
                 // console.log(_nowEditor);
                 // if(_nowEditor==-1){
@@ -261,24 +269,34 @@ lineEditor=(function($){
 
 
                 //对齐行号
+                //
+                var htmlFragment=document.createDocumentFragment();
+
                 if(lines.length!=lineNumers.length){
                     // console.log("需要对齐")
                     if(lines.length>lineNumers.length){
                         for(var i=lineNumers.length;i<lines.length;i++){
-                            $("#lineNumberCon_"+eid).append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
+                            var tdiv=document.createElement("div");
+                            tdiv.className="lineNumber";
+                            tdiv.textContent=(i+1);
+
+                            htmlFragment.appendChild(tdiv);
                         }
+
+                        $("#lineNumberCon_"+eid).append(htmlFragment);
+
+                        return;
                     }
 
                     if(lines.length<lineNumers.length){
                         for(var i=lineNumers.length;i>lines.length;i--){
                             $(lineNumers[i-1]).remove();
                         }
+
+                        return;
                     }
 
-                }else{
-                    // console.log("不用对齐");
-                    // console.log("\n")
-                }            
+                }           
             },
             getText:function(){
                 var lines=this.editorContainer.find(".lineContext");
@@ -297,8 +315,8 @@ lineEditor=(function($){
                 var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
                 // console.log("包裹行");
                 var nleng=cnode.length;
-
-                for (var i = 0; i < nleng; i++) {
+                var nowLineNumber=this.getNowLine();
+                for (var i = nowLineNumber; i < nleng; i++) {
 
                     // console.log("\n");                    
                     // console.log("第几个节点"+i);
@@ -350,6 +368,14 @@ lineEditor=(function($){
                             self.alignHeight(i);
                         }
                 });             
+            },
+            reDrawAll:function(){
+                var self=this;
+                setTimeout(function(){
+                    self.alignLine(_nowEditor);
+                    self.alignHeight(_nowEditor);
+                    self.getNowEditor(_nowEditor);
+                });                  
             }
         }
 

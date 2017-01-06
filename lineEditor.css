@@ -38,7 +38,7 @@
         color: #c0bdbd;    
       }
       .lineContext{
-        /*min-height: 23px;*/
+        /*min-height: auto !important;*/
         margin: 0 !important;
         overflow-wrap: break-word;        
         border-bottom: 1px solid #ededed;
