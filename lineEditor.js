@@ -1,6 +1,6 @@
 lineEditor=(function($){
         var _editorCount=0;
-        var _nowEditor;
+        var _nowEditor=-1;
 
         var lineEditor=function(obj){
 
@@ -221,6 +221,11 @@ lineEditor=(function($){
 
             },
             alignHeight:function(){
+                // console.log(_nowEditor);
+
+                if(_nowEditor==-1){
+                    return;
+                }                
                 //对齐行高
                 // console.log("对齐行高");
                 lines = $("#contextEassy_"+_nowEditor+" .lineContext");
@@ -243,6 +248,11 @@ lineEditor=(function($){
             },
             alignLine:function(){
                 // console.log("对齐一次哈");
+                // console.log(_nowEditor);
+                if(_nowEditor==-1){
+                    return;
+                }
+
                 var lines = $("#contextEassy_"+_nowEditor+" .lineContext");
                 var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");        
 
