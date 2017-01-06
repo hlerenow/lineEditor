@@ -259,7 +259,7 @@ lineEditor=(function($){
 
                 //对齐行号
                 if(lines.length!=lineNumers.length){
-                    // console.log("需要对齐")
+                    console.log("需要对齐")
                     if(lines.length>lineNumers.length){
                         for(var i=lineNumers.length;i<lines.length;i++){
                             $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
@@ -292,7 +292,7 @@ lineEditor=(function($){
             },
             wrapLine:function(){
                 var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
-                // console.log("包裹行");
+                console.log("包裹行");
                 for (var i = 0; i < cnode.length; i++) {
 
                     // console.log("第几个节点"+i);
@@ -313,12 +313,10 @@ lineEditor=(function($){
                     // console.log(cnode[i],cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p");
                     // console.log(" ");
 
-                    if(cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p")
+                    if(cnode[i].nodeType ===1&&$(cnode[i]).className!="lineContext")
                      {
                             // console.log("包裹不合法的标签");
                             $(cnode[i]).replaceWith("<p class=\"lineContext\">"+$(cnode[i]).text()+"</p>");
-
-
                     }
                 }                
             }
