@@ -72,7 +72,7 @@
 	    var editor=lineEditor("#easyCon");
 	    editor.init();
 
-	    //调用getText方法
+	    //调用getHtml方法
 		var content=editor.getHtml();
 
 	tips:p标签的类名一定有lineContext,但是不是只有lineContext这个类名
