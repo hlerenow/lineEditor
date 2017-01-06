@@ -31,7 +31,7 @@ lineEditor=(function($){
                         '      <div id="lineNumberCon_'+this.id+'" class="lineNumberCon">'+
                         '        <div id="lineNumber_'+this.id+'" class="lineNumber">1</div>'+
                         '      </div>'+
-                        '      <div id="contextEassy_'+this.id+'" class="contextEassy" contenteditable="true">'+
+                        '      <div id="contextEassy_'+this.id+'" class="contextEassy">'+
                         '            <p class="lineContext">请输入内容...</p>'+
                         '      </div>';            
             },
@@ -51,18 +51,21 @@ lineEditor=(function($){
 
                 this.bodyEvent=function(){};
 
+                this.windowResize();
+
+                this.windowResize=function(){
+
+                };
+
                 this.bindEvent();
+
+                $(this.editorContainer.find(".contextEassy")).attr("contenteditable","true");
             },
             bindEvent:function(){
                 var self=this;
                 //激活编辑器事件
                 this.activeEditor();
                 //窗口大小改变
-                $(window).on("resize",function(){
-                        self.alignLine();
-                        self.alignHeight();
-                });
-
 
                 //阻止文本内容拖拽事件
                 $(this.editorContainer).on("dragover",function(e){
@@ -80,9 +83,9 @@ lineEditor=(function($){
                 $(this.editorContainer).on("paste",function(e){
                     // console.log("浏览器粘贴事件");
                     setTimeout(function(){
-                        self.wrapLine();
-                        self.alignLine();
-                        self.alignHeight();                                
+                        self.wrapLine(_nowEditor);
+                        self.alignLine(_nowEditor);
+                        self.alignHeight(_nowEditor);                                
                     });
                 });
 
@@ -100,9 +103,9 @@ lineEditor=(function($){
                     }
                     //确保页面不会乱
                     setTimeout(function(){
-                        self.alignLine();
-                        self.alignHeight();
-                        self.getNowEditor();
+                        self.alignLine(_nowEditor);
+                        self.alignHeight(_nowEditor);
+                        self.getNowEditor(_nowEditor);
                     }); 
                     
 
@@ -220,16 +223,16 @@ lineEditor=(function($){
                 _nowEditor=parseInt(tid.split("_")[1]);
 
             },
-            alignHeight:function(){
-                // console.log(_nowEditor);
+            alignHeight:function(eid){
+                console.log(eid);
 
-                if(_nowEditor==-1){
-                    return;
-                }                
+                // if(_nowEditor==-1){
+                //     return;
+                // }                
                 //对齐行高
                 // console.log("对齐行高");
-                lines = $("#contextEassy_"+_nowEditor+" .lineContext");
-                lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");        
+                lines = $("#contextEassy_"+eid+" .lineContext");
+                lineNumers = $("#lineNumberCon_"+eid+" .lineNumber");        
      
                 for(var i=0;i<lines.length;i++){
                     // console.log()
@@ -238,7 +241,7 @@ lineEditor=(function($){
                     }
                 }
                 //为了解决fox,ie9偶尔顶部会有空节点
-                var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
+                var cnode = document.getElementById("contextEassy_"+eid).childNodes;
                 // console.log(document.getElementById("contextEassy_"+_nowEditor));
                 for(var i=0;i<cnode.length;i++){
                     if (cnode[i].nodeType == 3&&$.trim(cnode[i].textContent)=="") {
@@ -246,23 +249,23 @@ lineEditor=(function($){
                     }                    
                 }
             },
-            alignLine:function(){
+            alignLine:function(eid){
                 // console.log("对齐一次哈");
                 // console.log(_nowEditor);
-                if(_nowEditor==-1){
-                    return;
-                }
+                // if(_nowEditor==-1){
+                //     return;
+                // }
 
-                var lines = $("#contextEassy_"+_nowEditor+" .lineContext");
-                var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");        
+                var lines = $("#contextEassy_"+eid+" .lineContext");
+                var lineNumers = $("#lineNumberCon_"+eid+" .lineNumber");        
 
 
                 //对齐行号
                 if(lines.length!=lineNumers.length){
-                    console.log("需要对齐")
+                    // console.log("需要对齐")
                     if(lines.length>lineNumers.length){
                         for(var i=lineNumers.length;i<lines.length;i++){
-                            $("#lineNumberCon_"+_nowEditor).append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
+                            $("#lineNumberCon_"+eid).append("<div class=\"lineNumber\" >" + (i+1) + "</div>");
                         }
                     }
 
@@ -292,33 +295,61 @@ lineEditor=(function($){
             },
             wrapLine:function(){
                 var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
-                console.log("包裹行");
-                for (var i = 0; i < cnode.length; i++) {
+                // console.log("包裹行");
+                var nleng=cnode.length;
 
+                for (var i = 0; i < nleng; i++) {
+
+                    // console.log("\n");                    
                     // console.log("第几个节点"+i);
                     // console.log(cnode[i].nodeType);
-                    // console.log(cnode[i].className);
+                    // console.log(cnode[i].nodeName);
+                    // console.log(cnode[i]);
+                    // console.log("\n");
+
 
                     if (cnode[i].nodeType === 3 && cnode[i].textContent && $.trim(cnode[i].textContent)) {
                         // console.log("包裹元素"+i);
                         $(cnode[i]).wrap("<p class=\"lineContext\"/>");
+                        continue;
                     } 
 
-                    if(cnode[i].nodeType === 3 && !(cnode[i].textContent && $.trim(cnode[i].textContent)))
+                    if(cnode[i].nodeType === 3 &&  $.trim(cnode[i].textContent)=="")
                     {
                         $(cnode[i]).remove();
                         i--;
+                        nleng--;
+                        continue;
                     }
 
                     // console.log(cnode[i],cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p");
                     // console.log(" ");
 
-                    if(cnode[i].nodeType ===1&&$(cnode[i]).className!="lineContext")
+                    if(cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p")
                      {
-                            // console.log("包裹不合法的标签");
+                            // console.log("包裹不合法的标签1");
                             $(cnode[i]).replaceWith("<p class=\"lineContext\">"+$(cnode[i]).text()+"</p>");
+                            continue;
                     }
+
+                    if(cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()=="p"&&!$(cnode[i]).hasClass("lineContext"))
+                     {
+                            // console.log("包裹不合法的标签2");
+                            $(cnode[i]).addClass("lineContext");
+                            continue;
+                    }                    
                 }                
+            },
+            windowResize:function(){
+                var self=this;
+                $(window).on("resize",function(){
+                    // console.log("窗口改变");
+                        for(var i=0;i<_editorCount;i++){
+                            // console.log("改变的编辑器"+i);
+                            self.alignLine(i);
+                            self.alignHeight(i);
+                        }
+                });             
             }
         }
 
