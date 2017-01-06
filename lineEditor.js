@@ -88,11 +88,17 @@ lineEditor=(function($){
 
                 //按键事件
                 $(document).keydown(function(e) {
+                $(this.editorContainer).keydown(function(e) {
 
                     if(_nowEditor===-1){
-                        return;
+                        return ;
                     }
-
+                    // console.log(e.keyCode);
+                    // 屏蔽delte键
+                    if(e.keyCode===46){
+                        e.preventDefault();
+                        return false;
+                    }
                     //确保页面不会乱
                     setTimeout(function(){
                         self.alignLine();
