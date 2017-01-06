@@ -43,12 +43,12 @@ lineEditor=(function($){
 
                 }
 
-
                 $(this.editorContainer).addClass("easyCon");
 
                 this.editorContainer.html(this.domHtml);
 
                 this.bodyEvent();
+
                 this.bodyEvent=function(){};
 
                 this.bindEvent();
@@ -61,8 +61,32 @@ lineEditor=(function($){
                 $(window).on("resize",function(){
                         self.alignLine();
                         self.alignHeight();
-                })
+                });
 
+
+                //阻止文本内容拖拽事件
+                $(this.editorContainer).on("dragover",function(e){
+                    // console.log("dragover");
+                    e.preventDefault();
+                    return false;
+                });
+                $(this.editorContainer).on("drop",function(e){
+                    // console.log("drop");
+                    e.preventDefault();
+                    return false;
+                });                
+
+                //浏览器粘贴事件
+                $(this.editorContainer).on("paste",function(e){
+                    // console.log("浏览器粘贴事件");
+                    setTimeout(function(){
+                        self.wrapLine();
+                        self.alignLine();
+                        self.alignHeight();                                
+                    });
+                });
+
+                //按键事件
                 $(document).keydown(function(e) {
 
                     if(_nowEditor===-1){
@@ -91,19 +115,7 @@ lineEditor=(function($){
 
                             nowLineNumber++;
 
-                            setTimeout(function() {
-                                var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
-
-                                for (var i = 0; i < cnode.length; i++) {
-                                    if (cnode[i].nodeType == 3 && cnode[i].textContent && $.trim(cnode[i].textContent)) {
-                                        $(cnode[i]).wrap("<p class=\"lineContext\"/>");
-                                    } else {
-                                        if (cnode[i].className != "lineContext") {
-                                            $(cnode[i]).addClass("lineContext");
-                                        }
-                                    }
-                                }
-                            });
+                            setTimeout(self.wrapLine);
 
                         } else {
                             //达到最大行数              
@@ -114,6 +126,7 @@ lineEditor=(function($){
 
                     // 删除键
                     if (e.keyCode == 8) {
+                        // console.log(_nowEditor);
 
                         var lines = $("#contextEassy_"+_nowEditor+" .lineContext");
                         var lineNumers = $("#lineNumberCon_"+_nowEditor+" .lineNumber");
@@ -121,6 +134,7 @@ lineEditor=(function($){
                         var pointerPos = window.getSelection().anchorOffset;
 
                         //如果是第一行并且内容为空，拒绝删除
+                        // console.log("当前行数: "+nowLineNumber);
                         if (nowLineNumber === 0 && (pointerPos === 0 || (pointerPos === 1 && $.trim(nowLineText) == ""))) {
                             // console.log("如果是第一行并且内容为空，拒绝删除");
                             e.preventDefault();
@@ -197,7 +211,7 @@ lineEditor=(function($){
                 var node=this.getNowLine();
 
                 var tid=$($("#contextEassy_"+_nowEditor+" .lineContext")[node]).parent()[0].id;
-                console.log(tid);
+                // console.log(tid);
                 _nowEditor=parseInt(tid.split("_")[1]);
 
             },
@@ -215,9 +229,12 @@ lineEditor=(function($){
                 }
                 //为了解决fox,ie9偶尔顶部会有空节点
                 var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
-                if (cnode[0].nodeType == 3) {
-                    $(cnode[0]).remove();
-                }             
+                // console.log(document.getElementById("contextEassy_"+_nowEditor));
+                for(var i=0;i<cnode.length;i++){
+                    if (cnode[i].nodeType == 3&&$.trim(cnode[i].textContent)=="") {
+                        $(cnode[i]).remove();
+                    }                    
+                }
             },
             alignLine:function(){
                 // console.log("对齐一次哈");
@@ -242,11 +259,53 @@ lineEditor=(function($){
 
                 }else{
                     // console.log("不用对齐");
-                    // console.log("\n");
+                    // console.log("\n")
                 }            
             },
             getText:function(){
-                // console.log(this.editorContainer.html());
+                var lines=this.editorContainer.find(".lineContext");
+                var text="";
+                for(var i=0;i<lines.length;i++){
+                    text+=$(lines[i]).text()+"\n";
+                }
+
+                return text;
+                // console.log($(this.editorContainer.find(".contextEassy")[0]).text());
+            },
+            getHtml:function(){
+                return $(this.editorContainer.find(".contextEassy")[0]).html();
+            },
+            wrapLine:function(){
+                var cnode = document.getElementById("contextEassy_"+_nowEditor).childNodes;
+                // console.log("包裹行");
+                for (var i = 0; i < cnode.length; i++) {
+
+                    // console.log("第几个节点"+i);
+                    // console.log(cnode[i].nodeType);
+                    // console.log(cnode[i].className);
+
+                    if (cnode[i].nodeType === 3 && cnode[i].textContent && $.trim(cnode[i].textContent)) {
+                        // console.log("包裹元素"+i);
+                        $(cnode[i]).wrap("<p class=\"lineContext\"/>");
+                    } 
+
+                    if(cnode[i].nodeType === 3 && !(cnode[i].textContent && $.trim(cnode[i].textContent)))
+                    {
+                        $(cnode[i]).remove();
+                        i--;
+                    }
+
+                    // console.log(cnode[i],cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p");
+                    // console.log(" ");
+
+                    if(cnode[i].nodeType ===1&&cnode[i].nodeName.toLowerCase()!="p")
+                     {
+                            // console.log("包裹不合法的标签");
+                            $(cnode[i]).replaceWith("<p class=\"lineContext\">"+$(cnode[i]).text()+"</p>");
+
+
+                    }
+                }                
             }
         }
 
