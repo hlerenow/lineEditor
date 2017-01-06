@@ -224,7 +224,7 @@ lineEditor=(function($){
 
             },
             alignHeight:function(eid){
-                console.log(eid);
+                // console.log(eid);
 
                 // if(_nowEditor==-1){
                 //     return;
